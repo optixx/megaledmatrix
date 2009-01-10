@@ -1,0 +1,29 @@
+
+daten pro panel,25 frames,2 colors a 4bit = 6400 bytes
+p=16*16*25*4*2/8
+
+o Display
+	6 * 4 = 96x48
+	
+	
+
+
+o atmega8 
+	o 3 panels
+	o 15 bits fuer die displays
+		o pd2 - pd7
+		o pb0 - pb5
+		o pc0 - pc5
+		
+	o parallel zeilenweise rendern
+		
+
+o parts
+	8 x atmega8
+	8 x quarz
+	16 x 27pf
+	24 x 2x5 pfosten stecker
+    5m 10pol flachband
+	24 foppy stecker
+	
+	
