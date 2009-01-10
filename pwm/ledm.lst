@@ -1,0 +1,410 @@
+   1               		.file	"ledm.c"
+   2               		.arch atmega8
+   3               	__SREG__ = 0x3f
+   4               	__SP_H__ = 0x3e
+   5               	__SP_L__ = 0x3d
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  12               		.text
+  13               	.Ltext0:
+  66               	.global	gamma_table
+  67               		.data
+  70               	gamma_table:
+  71 0000 0000      		.word	0
+  72 0002 0080      		.word	-32768
+  73 0004 2489      		.word	-30428
+  74 0006 FFFF      		.word	-1
+  75               		.text
+  78               	.global	clear_fb
+  80               	clear_fb:
+  81               		.stabd	46,0,0
+   1:ledm.c        **** #include "ledm.h"
+   2:ledm.c        **** 
+   3:ledm.c        **** // 0, 1, 6, 16
+   4:ledm.c        **** 
+   5:ledm.c        **** uint16_t gamma_table[4]={0x0000,
+   6:ledm.c        **** 					0x8000,
+   7:ledm.c        **** 			 		0x8924,
+   8:ledm.c        **** 			 		0xffff};
+   9:ledm.c        **** /*
+  10:ledm.c        **** uint8_t gamma_table[4]={0x00,
+  11:ledm.c        **** 			0x80,
+  12:ledm.c        **** 			0x92,
+  13:ledm.c        **** 			0xff};
+  14:ledm.c        **** */
+  15:ledm.c        **** //0, 2, 4, 7, 11, 19, 35, 64
+  16:ledm.c        **** //0, 1  2  4   6   9  17  32
+  17:ledm.c        **** //0  0  1  2   3   5   9  16
+  18:ledm.c        **** 
+  19:ledm.c        **** 
+  20:ledm.c        **** void clear_fb(uint8_t fb[][16])
+  21:ledm.c        **** {
+  83               	.LM0:
+  84               	/* prologue: frame size=0 */
+  85               	/* prologue end (size=0) */
+  86 0000 30E1      		ldi r19,lo8(16)
+  87               	.L2:
+  89               	.LM1:
+  90 0002 FC01      		movw r30,r24
+  91 0004 20E0      		ldi r18,lo8(0)
+  92               	.L3:
+  22:ledm.c        **** 	uint8_t y,x;
+  23:ledm.c        **** 
+  24:ledm.c        ****         //clear framebuffer
+  25:ledm.c        ****         for(y=0; y<16; y++)
+  26:ledm.c        ****         {
+  27:ledm.c        ****                 for(x=0; x<16; x++)
+  28:ledm.c        ****                 {
+  29:ledm.c        **** 				fb[y][x] = 0;
+  94               	.LM2:
+  95 0006 1192      		st Z+,__zero_reg__
+  97               	.LM3:
+  98 0008 2F5F      		subi r18,lo8(-(1))
+  99 000a 2031      		cpi r18,lo8(16)
+ 100 000c E1F7      		brne .L3
+ 101 000e 3150      		subi r19,lo8(-(-1))
+ 102 0010 4096      		adiw r24,16
+ 104               	.LM4:
+ 105 0012 3323      		tst r19
+ 106 0014 B1F7      		brne .L2
+ 107               	/* epilogue: frame size=0 */
+ 108 0016 0895      		ret
+ 109               	/* epilogue end (size=1) */
+ 110               	/* function clear_fb size 12 (11) */
+ 115               	.Lscope0:
+ 117               		.stabd	78,0,0
+ 121               	.global	scroll_h
+ 123               	scroll_h:
+ 124               		.stabd	46,0,0
+  30:ledm.c        ****                 }
+  31:ledm.c        ****         }
+  32:ledm.c        **** }
+  33:ledm.c        **** 
+  34:ledm.c        **** 
+  35:ledm.c        **** void scroll_h(uint8_t fb[][16], uint8_t dir)
+  36:ledm.c        **** {
+ 126               	.LM5:
+ 127               	/* prologue: frame size=0 */
+ 128 0018 FF92      		push r15
+ 129 001a 0F93      		push r16
+ 130 001c 1F93      		push r17
+ 131 001e CF93      		push r28
+ 132 0020 DF93      		push r29
+ 133               	/* prologue end (size=5) */
+ 134 0022 9C01      		movw r18,r24
+  37:ledm.c        **** 	uint8_t temp=0,x,y;
+  38:ledm.c        **** 
+  39:ledm.c        ****         if(dir=='l')
+ 136               	.LM6:
+ 137 0024 6C36      		cpi r22,lo8(108)
+ 138 0026 11F5      		brne .L12
+ 140               	.LM7:
+ 141 0028 EC01      		movw r28,r24
+ 142 002a BC01      		movw r22,r24
+ 143 002c 6051      		subi r22,lo8(-(240))
+ 144 002e 7F4F      		sbci r23,hi8(-(240))
+ 145 0030 40E0      		ldi r20,lo8(0)
+ 146 0032 50E0      		ldi r21,hi8(0)
+ 147 0034 8C01      		movw r16,r24
+ 148 0036 005F      		subi r16,lo8(-(16))
+ 149 0038 1F4F      		sbci r17,hi8(-(16))
+ 150               	.L14:
+  40:ledm.c        ****         {
+  41:ledm.c        **** 		for(y=0; y<16; y++)
+  42:ledm.c        ****                 {
+  43:ledm.c        **** 	                temp=fb[0][y];
+ 152               	.LM8:
+ 153 003a F880      		ld r15,Y
+ 154 003c D801      		movw r26,r16
+ 155 003e A40F      		add r26,r20
+ 156 0040 B51F      		adc r27,r21
+ 157 0042 F901      		movw r30,r18
+ 158 0044 E40F      		add r30,r20
+ 159 0046 F51F      		adc r31,r21
+ 160 0048 9FE0      		ldi r25,lo8(15)
+ 161               	.L15:
+  44:ledm.c        **** 	                for(x=0; x<15; x++)
+  45:ledm.c        ****                         {
+  46:ledm.c        ****                                 fb[x][y] = fb[x+1][y];
+ 163               	.LM9:
+ 164 004a 8C91      		ld r24,X
+ 165 004c 8083      		st Z,r24
+ 166 004e 9150      		subi r25,lo8(-(-1))
+ 167 0050 5096      		adiw r26,16
+ 168 0052 7096      		adiw r30,16
+ 170               	.LM10:
+ 171 0054 9923      		tst r25
+ 172 0056 C9F7      		brne .L15
+  47:ledm.c        ****                         }
+  48:ledm.c        ****                         fb[15][y] = temp;
+ 174               	.LM11:
+ 175 0058 FB01      		movw r30,r22
+ 176 005a F192      		st Z+,r15
+ 177 005c BF01      		movw r22,r30
+ 178 005e 4F5F      		subi r20,lo8(-(1))
+ 179 0060 5F4F      		sbci r21,hi8(-(1))
+ 180 0062 2196      		adiw r28,1
+ 182               	.LM12:
+ 183 0064 4031      		cpi r20,16
+ 184 0066 5105      		cpc r21,__zero_reg__
+ 185 0068 21F1      		breq .L22
+ 186 006a E7CF      		rjmp .L14
+ 187               	.L12:
+  49:ledm.c        ****                 }
+  50:ledm.c        ****         }
+  51:ledm.c        **** 
+  52:ledm.c        ****         if(dir=='r')
+ 189               	.LM13:
+ 190 006c 6237      		cpi r22,lo8(114)
+ 191 006e 09F5      		brne .L22
+ 193               	.LM14:
+ 194 0070 EC01      		movw r28,r24
+ 195 0072 C051      		subi r28,lo8(-(240))
+ 196 0074 DF4F      		sbci r29,hi8(-(240))
+ 197 0076 8E01      		movw r16,r28
+ 198 0078 40E0      		ldi r20,lo8(0)
+ 199 007a 50E0      		ldi r21,hi8(0)
+ 200 007c BC01      		movw r22,r24
+ 201 007e 6052      		subi r22,lo8(-(224))
+ 202 0080 7F4F      		sbci r23,hi8(-(224))
+ 203               	.L19:
+  53:ledm.c        ****         {
+  54:ledm.c        ****                 for(y=0; y<16; y++)
+  55:ledm.c        ****                 {
+  56:ledm.c        ****                         temp=fb[15][y];
+ 205               	.LM15:
+ 206 0082 F880      		ld r15,Y
+ 207 0084 DB01      		movw r26,r22
+ 208 0086 A40F      		add r26,r20
+ 209 0088 B51F      		adc r27,r21
+ 210 008a F801      		movw r30,r16
+ 211 008c E40F      		add r30,r20
+ 212 008e F51F      		adc r31,r21
+ 213 0090 9FE0      		ldi r25,lo8(15)
+ 214               	.L20:
+  57:ledm.c        ****                         for(x=15; x>0; x--)
+  58:ledm.c        ****                         {
+  59:ledm.c        ****                                 fb[x][y] = fb[x-1][y];
+ 216               	.LM16:
+ 217 0092 8C91      		ld r24,X
+ 218 0094 8083      		st Z,r24
+ 219 0096 9150      		subi r25,lo8(-(-1))
+ 220 0098 5097      		sbiw r26,16
+ 221 009a 7097      		sbiw r30,16
+ 223               	.LM17:
+ 224 009c 9923      		tst r25
+ 225 009e C9F7      		brne .L20
+  60:ledm.c        ****                         }
+  61:ledm.c        ****                         fb[0][y] = temp;
+ 227               	.LM18:
+ 228 00a0 F901      		movw r30,r18
+ 229 00a2 F192      		st Z+,r15
+ 230 00a4 9F01      		movw r18,r30
+ 231 00a6 4F5F      		subi r20,lo8(-(1))
+ 232 00a8 5F4F      		sbci r21,hi8(-(1))
+ 233 00aa 2196      		adiw r28,1
+ 235               	.LM19:
+ 236 00ac 4031      		cpi r20,16
+ 237 00ae 5105      		cpc r21,__zero_reg__
+ 238 00b0 41F7      		brne .L19
+ 239               	.L22:
+ 240               	/* epilogue: frame size=0 */
+ 241 00b2 DF91      		pop r29
+ 242 00b4 CF91      		pop r28
+ 243 00b6 1F91      		pop r17
+ 244 00b8 0F91      		pop r16
+ 245 00ba FF90      		pop r15
+ 246 00bc 0895      		ret
+ 247               	/* epilogue end (size=6) */
+ 248               	/* function scroll_h size 83 (72) */
+ 253               	.Lscope1:
+ 255               		.stabd	78,0,0
+ 259               	.global	scroll_v
+ 261               	scroll_v:
+ 262               		.stabd	46,0,0
+  62:ledm.c        ****                 }
+  63:ledm.c        ****         }
+  64:ledm.c        **** 
+  65:ledm.c        **** }
+  66:ledm.c        **** 
+  67:ledm.c        **** 
+  68:ledm.c        **** void scroll_v(uint8_t fb[][16], uint8_t dir)
+  69:ledm.c        **** {
+ 264               	.LM20:
+ 265               	/* prologue: frame size=0 */
+ 266               	/* prologue end (size=0) */
+  70:ledm.c        ****         uint8_t temp=0,x,y;
+  71:ledm.c        ****         
+  72:ledm.c        ****         if(dir=='u')
+ 268               	.LM21:
+ 269 00be 6537      		cpi r22,lo8(117)
+ 270 00c0 81F4      		brne .L30
+ 272               	.LM22:
+ 273 00c2 DC01      		movw r26,r24
+ 274 00c4 20E1      		ldi r18,lo8(16)
+ 275               	.L32:
+  73:ledm.c        ****         {
+  74:ledm.c        ****                 for(x=0; x<16; x++)
+  75:ledm.c        ****                 {
+  76:ledm.c        ****                         temp=fb[x][0];
+ 277               	.LM23:
+ 278 00c6 3C91      		ld r19,X
+ 279 00c8 FD01      		movw r30,r26
+ 280 00ca 9FE0      		ldi r25,lo8(15)
+ 281               	.L33:
+  77:ledm.c        ****                         for(y=0; y<15; y++)
+  78:ledm.c        ****                         {
+  79:ledm.c        ****                                 fb[x][y] = fb[x][y+1];
+ 283               	.LM24:
+ 284 00cc 8181      		ldd r24,Z+1
+ 285 00ce 8193      		st Z+,r24
+ 286 00d0 9150      		subi r25,lo8(-(-1))
+ 288               	.LM25:
+ 289 00d2 E1F7      		brne .L33
+  80:ledm.c        ****                         }
+  81:ledm.c        ****                         fb[x][15] = temp;
+ 291               	.LM26:
+ 292 00d4 FD01      		movw r30,r26
+ 293 00d6 3787      		std Z+15,r19
+ 294 00d8 2150      		subi r18,lo8(-(-1))
+ 295 00da 5096      		adiw r26,16
+ 297               	.LM27:
+ 298 00dc 2223      		tst r18
+ 299 00de 99F0      		breq .L40
+ 300 00e0 F2CF      		rjmp .L32
+ 301               	.L30:
+  82:ledm.c        ****                 }
+  83:ledm.c        ****         }
+  84:ledm.c        **** 
+  85:ledm.c        **** 	   if(dir=='d')
+ 303               	.LM28:
+ 304 00e2 6436      		cpi r22,lo8(100)
+ 305 00e4 81F4      		brne .L40
+ 306 00e6 DC01      		movw r26,r24
+ 307 00e8 20E0      		ldi r18,lo8(0)
+ 308               	.L37:
+  86:ledm.c        ****         {
+  87:ledm.c        ****                 for(x=0; x<16; x++)
+  88:ledm.c        ****                 {
+  89:ledm.c        ****                         temp=fb[x][15];
+ 310               	.LM29:
+ 311 00ea FD01      		movw r30,r26
+ 312 00ec 3785      		ldd r19,Z+15
+ 313 00ee 9FE0      		ldi r25,lo8(15)
+ 314               	.L38:
+  90:ledm.c        ****                         for(y=15; y>0; y--)
+  91:ledm.c        ****                         {
+  92:ledm.c        ****                             	fb[x][y] = fb[x][y-1];
+ 316               	.LM30:
+ 317 00f0 8685      		ldd r24,Z+14
+ 318 00f2 8787      		std Z+15,r24
+ 319 00f4 9150      		subi r25,lo8(-(-1))
+ 320 00f6 3197      		sbiw r30,1
+ 322               	.LM31:
+ 323 00f8 9923      		tst r25
+ 324 00fa D1F7      		brne .L38
+  93:ledm.c        ****                         }
+  94:ledm.c        ****                         fb[x][0] = temp;
+ 326               	.LM32:
+ 327 00fc 3C93      		st X,r19
+ 329               	.LM33:
+ 330 00fe 2F5F      		subi r18,lo8(-(1))
+ 331 0100 5096      		adiw r26,16
+ 332 0102 2031      		cpi r18,lo8(16)
+ 333 0104 91F7      		brne .L37
+ 334               	.L40:
+ 335 0106 0895      		ret
+ 336               	/* epilogue: frame size=0 */
+ 337               	/* epilogue: noreturn */
+ 338               	/* epilogue end (size=0) */
+ 339               	/* function scroll_v size 38 (38) */
+ 345               	.Lscope2:
+ 347               		.stabd	78,0,0
+ 353               	.global	set_px
+ 355               	set_px:
+ 356               		.stabd	46,0,0
+  95:ledm.c        ****                 }
+  96:ledm.c        ****         }
+  97:ledm.c        **** }
+  98:ledm.c        **** 
+  99:ledm.c        **** 
+ 100:ledm.c        **** //FUNCTION "set_px": 0<=x<=15, 0<=y<=15, color: 'r','g'
+ 101:ledm.c        **** //sets pixel in fb_r or fb_g
+ 102:ledm.c        **** void set_px(uint8_t fb[][16], uint8_t x, uint8_t y, uint8_t bright)
+ 103:ledm.c        **** {
+ 358               	.LM34:
+ 359               	/* prologue: frame size=0 */
+ 360               	/* prologue end (size=0) */
+ 361 0108 E62F      		mov r30,r22
+ 104:ledm.c        ****         	fb[x][y] = bright;
+ 363               	.LM35:
+ 364 010a FF27      		clr r31
+ 365 010c 34E0      		ldi r19,4
+ 366 010e EE0F      	1:	lsl r30
+ 367 0110 FF1F      		rol r31
+ 368 0112 3A95      		dec r19
+ 369 0114 E1F7      		brne 1b
+ 370 0116 E80F      		add r30,r24
+ 371 0118 F91F      		adc r31,r25
+ 372 011a E40F      		add r30,r20
+ 373 011c F11D      		adc r31,__zero_reg__
+ 374 011e 2083      		st Z,r18
+ 375               	/* epilogue: frame size=0 */
+ 376 0120 0895      		ret
+ 377               	/* epilogue end (size=1) */
+ 378               	/* function set_px size 13 (12) */
+ 380               	.Lscope3:
+ 382               		.stabd	78,0,0
+ 387               	.global	clr_px
+ 389               	clr_px:
+ 390               		.stabd	46,0,0
+ 105:ledm.c        **** }
+ 106:ledm.c        **** 
+ 107:ledm.c        **** //FUNCTION "clr_px": 0<=x<=15, 0<=y<=15, color: 'r','g'
+ 108:ledm.c        **** //clears pixel in fb_r or fb_g
+ 109:ledm.c        **** void clr_px(uint8_t fb[][16], uint8_t x, uint8_t y)
+ 110:ledm.c        **** {
+ 392               	.LM36:
+ 393               	/* prologue: frame size=0 */
+ 394               	/* prologue end (size=0) */
+ 395 0122 E62F      		mov r30,r22
+ 111:ledm.c        ****         	fb[x][y] = 0;
+ 397               	.LM37:
+ 398 0124 FF27      		clr r31
+ 399 0126 54E0      		ldi r21,4
+ 400 0128 EE0F      	1:	lsl r30
+ 401 012a FF1F      		rol r31
+ 402 012c 5A95      		dec r21
+ 403 012e E1F7      		brne 1b
+ 404 0130 E80F      		add r30,r24
+ 405 0132 F91F      		adc r31,r25
+ 406 0134 E40F      		add r30,r20
+ 407 0136 F11D      		adc r31,__zero_reg__
+ 408 0138 1082      		st Z,__zero_reg__
+ 409               	/* epilogue: frame size=0 */
+ 410 013a 0895      		ret
+ 411               	/* epilogue end (size=1) */
+ 412               	/* function clr_px size 13 (12) */
+ 414               	.Lscope4:
+ 416               		.stabd	78,0,0
+ 419               	.Letext0:
+ 420               	/* File "ledm.c": code  159 = 0x009f ( 145), prologues   5, epilogues   9 */
+DEFINED SYMBOLS
+                            *ABS*:00000000 ledm.c
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:3      *ABS*:0000003f __SREG__
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:4      *ABS*:0000003e __SP_H__
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:5      *ABS*:0000003d __SP_L__
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:6      *ABS*:00000000 __tmp_reg__
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:7      *ABS*:00000001 __zero_reg__
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:70     .data:00000000 gamma_table
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:80     .text:00000000 clear_fb
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:123    .text:00000018 scroll_h
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:261    .text:000000be scroll_v
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:355    .text:00000108 set_px
+/var/folders/sA/sAHseDBTFXK0vIyJlwAPOU+++TI/-Tmp-//ccQr8aGF.s:389    .text:00000122 clr_px
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
