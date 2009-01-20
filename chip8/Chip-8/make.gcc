@@ -1,0 +1,8 @@
+chip8.elf : chip8.o opcode.o
+	gcc -o chip8.elf chip8.o opcode.o
+
+chip8.o : chip8.c
+	gcc -Wall -c -o chip8.o -std=c99 chip8.c
+
+opcode.o : opcode.c
+	gcc -Wall -c -o opcode.o -std=c99 opcode.c
