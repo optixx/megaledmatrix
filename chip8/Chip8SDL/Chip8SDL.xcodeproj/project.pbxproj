@@ -12,7 +12,6 @@
 		002F3A2E09D0888800EBEB88 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A2C09D0888800EBEB88 /* SDLMain.m */; };
 		002F3A3F09D088BA00EBEB88 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F3A3E09D088BA00EBEB88 /* main.c */; };
 		002F3AF109D08F1000EBEB88 /* SDLMain.nib in Resources */ = {isa = PBXBuildFile; fileRef = 002F3AEF09D08F1000EBEB88 /* SDLMain.nib */; };
-		637F48180F2685FF0073E402 /* untitled.c in Sources */ = {isa = PBXBuildFile; fileRef = 637F48170F2685FF0073E402 /* untitled.c */; };
 		6397946C0F1FD280006BBC53 /* cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 639794690F1FD280006BBC53 /* cpu.c */; };
 		6397946D0F1FD280006BBC53 /* graphics.c in Sources */ = {isa = PBXBuildFile; fileRef = 6397946A0F1FD280006BBC53 /* graphics.c */; };
 		6397946E0F1FD280006BBC53 /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = 6397946B0F1FD280006BBC53 /* memory.c */; };
@@ -49,7 +48,6 @@
 		637F47810F266F8F0073E402 /* graphics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = graphics.h; sourceTree = "<group>"; };
 		637F47820F266F8F0073E402 /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = memory.h; sourceTree = "<group>"; };
 		637F48160F2685FF0073E402 /* untitled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = untitled.h; sourceTree = "<group>"; };
-		637F48170F2685FF0073E402 /* untitled.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = untitled.c; sourceTree = "<group>"; };
 		639794690F1FD280006BBC53 /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
 		6397946A0F1FD280006BBC53 /* graphics.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = graphics.c; sourceTree = "<group>"; };
 		6397946B0F1FD280006BBC53 /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = memory.c; sourceTree = "<group>"; };
@@ -122,7 +120,6 @@
 			children = (
 				637F477F0F266F8F0073E402 /* cpu.h */,
 				637F48160F2685FF0073E402 /* untitled.h */,
-				637F48170F2685FF0073E402 /* untitled.c */,
 				637F47810F266F8F0073E402 /* graphics.h */,
 				637F47820F266F8F0073E402 /* memory.h */,
 				32CA4F630368D1EE00C91783 /* Chip8SDL_Prefix.pch */,
@@ -214,7 +211,6 @@
 				6397946C0F1FD280006BBC53 /* cpu.c in Sources */,
 				6397946D0F1FD280006BBC53 /* graphics.c in Sources */,
 				6397946E0F1FD280006BBC53 /* memory.c in Sources */,
-				637F48180F2685FF0073E402 /* untitled.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
