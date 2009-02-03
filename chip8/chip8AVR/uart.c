@@ -1,57 +1,79 @@
-#include <avr/pgmspace.h>
+#include <avr/io.h>
 #include <avr/interrupt.h>
-#include "exp.h"
-#include "leds.h"
+#include <avr/pgmspace.h>
+#include <stdio.h>
+#include "uart.h"
+#include "fifo.h"
+
+volatile struct
+{
+    uint8_t tmr_int: 1;
+    uint8_t adc_int: 1;
+    uint8_t rx_int: 1;
+}
+intflags;
+
+/*
+ *  * Last character read from the UART.
+ *   
+ */
+volatile char rxbuff;
 
 
-void uart_setup(void) {
-    //setup uart
-    UCSR0B=0x98;
-//    UCSR0B=0x18; //no interrupt
-    UCSR0C=0x6;
+FILE uart_stdout = FDEV_SETUP_STREAM(uart_stream, NULL, _FDEV_SETUP_WRITE);
 
-//115200
-//    UCSR0A=0; //2=2xspeed
-//    UBRR0=10; //115200 baud
+void uart_init(void)
+{
+    UCSRA = _BV(U2X);     /* improves baud rate error @ F_CPU = 1 MHz */
+    UCSRB = _BV(TXEN)|_BV(RXEN)|_BV(RXCIE); /* tx/rx enable, rx complete intr */
+    UBRRL = (F_CPU / (8 * 115200UL)) - 1;  /* 9600 Bd */
 
-
-    //Halve megabit >:)
-    UCSR0A=2; //2=2xspeed
-    UBRR0=4; //500000 baud
 }
 
 
-ISR(USART_RX_vect) {
-    static short wpos=0;
-    static unsigned char *wptr;
-    unsigned char b;
-    b=UDR0;
-    //Pass through all command bytes
-    if (b&0x80) {
-//	while((UCSR0A&(1<<5))==0) ;
-	UDR0=b;
-	if (b==0x80) { //reset frame
-	    wpos=0;
-	    wptr=dispmem;
-/*	} else if (b==0xaa) { //reset avr
-	    //reset avr using watchdog
-	    cli();
-	    WDTCSR=(1<<3)|(1<<4);
-	    WDTCSR=(1<<3);
-	    while(1);
-*/	}
-	return;
+ISR(USART_RXC_vect)
+{
+    uint8_t c;
+    c = UDR;
+    if (bit_is_clear(UCSRA, FE)){
+        rxbuff = c;
+        intflags.rx_int = 1;
     }
-    
-    if (wpos==512) { //check display full
-	//yes -> pass through
-//	while((UCSR0A&(1<<5))==0) ;
-	UDR0=b;
-    } else {
-//	dispmem[wpos++]=pgm_read_byte(exptab+(b>>2));
-	*wptr=pgm_read_byte(exptab+(b>>2));
-	wptr++;
-	wpos++;
+}
+
+
+void  uart_putc(uint8_t c)
+{
+    loop_until_bit_is_set(UCSRA, UDRE);
+    UDR = c;
+}
+
+
+void uart_puts(const char *s)
+{
+    do {
+        uart_putc(*s);
     }
+    while (*s++);
+}
+
+void uart_puts_P(PGM_P s)
+{
+    while (1) {
+        unsigned char c = pgm_read_byte(s);
+        s++;
+        if ('\0' == c)
+            break;
+        uart_putc(c);
+    }
+}
+
+static int uart_stream(char c, FILE *stream)
+{
+    if (c == '\n')
+        uart_putc('\r');
+    loop_until_bit_is_set(UCSRA, UDRE);
+    UDR = c;
+    return 0;
 }
 

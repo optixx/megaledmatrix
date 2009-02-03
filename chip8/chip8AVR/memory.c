@@ -1,6 +1,6 @@
 /*
  *  untitled.h
- *  Chip8SDL
+ *  Chip8AVR
  *
  *  Created by david on 1/20/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
@@ -8,15 +8,15 @@
  */
 
 
-#include <stdio.h>
+#include <avr/io.h>  
+#include <avr/eeprom.h> 
+#include <avr/pgmspace.h> 
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
+#include <stdio.h>
 #include "memory.h"
 
-unsigned char game_pong[] = {
+unsigned char game_pong[] PROGMEM = {
 0x6a, 0x02, 0x6b, 0x0c, 0x6c, 0x3f, 0x6d, 0x0c, 0xa2, 0xea, 0xda, 0xb6,
 0xdc, 0xd6, 0x6e, 0x00, 0x22, 0xd4, 0x66, 0x03, 0x68, 0x02, 0x60, 0x60,
 0xf0, 0x15, 0xf0, 0x07, 0x30, 0x00, 0x12, 0x1a, 0xc7, 0x17, 0x77, 0x08,
@@ -41,13 +41,6 @@ unsigned char game_pong[] = {
 };
 unsigned int game_pong_len= 246;
 
-long _filesize(const char *FileName){
-    struct stat file;
-	if(!stat(FileName,&file)){
-		return file.st_size;
-	}
-	return 0;
-}
 void memory_init()
 {	
 	memory_area = (unsigned char *)malloc(MEMORY_SIZE);
@@ -57,23 +50,8 @@ void memory_init()
 
 void memory_load_builtin ()
 {
-	memcpy(&memory_area[MEMORY_START],game_pong,game_pong_len);
+	memcpy_P(&memory_area[MEMORY_START],game_pong,game_pong_len);
 	printf("Loaded Pong to 0x%04x (%i bytes) %x\n",MEMORY_START,game_pong_len,game_pong[0]);
 }		
 
-
-void memory_load_rom (const char *filename )
-{
-	FILE *in;
-	printf("Clear RAM %p %i\n",memory_area,MEMORY_SIZE);
-	memset(memory_area,0,MEMORY_SIZE);
-	int size = _filesize(filename);
-	if ((in = fopen( filename, "rb")) == NULL){
-		printf("Cannot open %s\n", filename );
-	}else {
-		fread( &memory_area[MEMORY_START], size, 1, in);
-		printf("Loaded %s to 0x%04x (%i bytes)\n",filename,MEMORY_START,size);
-		fclose(in);
-	}
-}
 

@@ -1,5 +1,4 @@
 /*
- *  untitled.h
  *  Chip8AVR
  *
  *  Created by david on 1/20/09.
@@ -8,10 +7,9 @@
  */
 
 
-#ifndef _GRAPHICS_H_
-#define _GRAPHICS_H_
-
-void display_screen( uint8_t *framebuffer01);
-
+#ifndef _EEPROM_H_
+#define _EEPROM_H_
+uint8_t * dump_eeprom(uint8_t *addr);
+uint8_t * dump_progmem(uint8_t *addr);
 #endif
 

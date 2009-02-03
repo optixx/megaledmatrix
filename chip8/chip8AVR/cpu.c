@@ -1,6 +1,6 @@
 /*
  *  untitled.h
- *  Chip8SDL
+ *  Chip8AVR
  *
  *  Created by david on 1/20/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
@@ -8,25 +8,27 @@
  */
 
 
-#include <stdio.h>
+#include <avr/io.h>  
+#include <avr/eeprom.h> 
+#include <avr/pgmspace.h> 
 #include <stdlib.h>
-#include <sys/stat.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "cpu.h"
 #include "graphics.h"
 #include "memory.h"
 
 
-unsigned char V[16];
-unsigned int subPC[16];
-static unsigned int PC, I;
+uint8_t  V[16];
+uint16_t subPC[16];
+uint16_t PC, I;
 
-char framebuffer01[FRAMEBUFER_SIZE+1];
-char subcounter;
+uint8_t framebuffer01[FRAMEBUFER_SIZE];
+uint8_t subcounter;
 
-int keyval = 1;
-
-char font[80]={ 0xF0, 0x90, 0x90, 0x90, 0xF0,// 0
+uint8_t keyval = 1;
+uint8_t font[80] PROGMEM ={ 0xF0, 0x90, 0x90, 0x90, 0xF0,// 0
 		0x20, 0x60, 0x20, 0x20, 0x70,// 1
 		0xF0, 0x10, 0xF0, 0x80, 0xF0,// 2
 		0xF0, 0x10, 0xF0, 0x10, 0xF0,// 3
@@ -50,68 +52,17 @@ char font[80]={ 0xF0, 0x90, 0x90, 0x90, 0xF0,// 0
 7 8 9 E
 A 0 B F
 */
-void  readkeys(int * value){
-	int keyval = 0;
-	SDL_Event keyevent;    
-	while (SDL_PollEvent(&keyevent)){
-		switch(keyevent.type){
-			case SDL_QUIT:
-				printf("quit..\n");
-				exit(0);
-			case SDL_KEYDOWN:
-				switch(keyevent.key.keysym.sym){
-					case SDLK_q:
-						keyval = 0x01;
-						break;
-					case SDLK_w:
-						keyval = 0x02;
-						break;
-					case SDLK_e:
-						keyval = 0x03;
-						break;
-					case SDLK_r:
-						keyval = 0x0d;
-						break;
-					case SDLK_a:
-						keyval = 0x04;
-						break;
-					case SDLK_s:
-						keyval = 0x05;
-						break;
-					case SDLK_d:
-						keyval = 0x06;
-						break;
-					case SDLK_f:
-						keyval = 0x0d;
-						break;
-					case SDLK_y:
-						keyval = 0x07;
-						break;
-					case SDLK_x:
-						keyval = 0x08;
-						break;
-					case SDLK_c:
-						keyval = 0x09;
-						break;
-					case SDLK_v:
-						keyval = 0x0e;
-						break;
-					default:
-						break;
-				}
-		}
-	}
-	if (keyval>0){
-		*value = keyval;
-	}
+void  readkeys(uint8_t * value){
+	uint8_t keyval = 0;
+	*value = keyval;
 }
 
 void cpu_int()
 {
 	memset(framebuffer01,0,FRAMEBUFER_SIZE);
-	memcpy(memory_area,font,80* sizeof(char));
-	memset(V,0,16 * sizeof(char));
-	memset(subPC,0,16 * sizeof(int));
+	memcpy_P(memory_area,font,80* sizeof(uint8_t));
+	memset(V,0,16 * sizeof(uint8_t));
+	memset(subPC,0,16 * sizeof(uint16_t));
 	PC = MEMORY_START;//sets pc to starting memory address
 	subcounter = 0;
 	runable = 1;
@@ -125,13 +76,13 @@ void cpu_halt()
 }
 
 
-int cpu(SDL_Surface *screen, SDL_Event *event )
+uint8_t cpu()
 {
 	
-	int i;
-	char vx, yline, data, vxval, vyval;
+	uint8_t i;
+	uint8_t vx, yline, data, vxval, vyval;
 
-	unsigned int opcode;
+	uint16_t opcode;
 	readkeys(&keyval);
 	
 	if (!runable){
@@ -316,7 +267,7 @@ int cpu(SDL_Surface *screen, SDL_Event *event )
 				}
 			}
 			PC+=2;
-			display_screen( framebuffer01, screen );
+			display_screen( framebuffer01 );
 			break;
 		case 0xE000:
 			switch (opcode&0x00FF){
