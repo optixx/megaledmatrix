@@ -21,12 +21,15 @@
     USB_CFG_DPLUS_BIT to your hardware. The rest should be left unchanged.
 */
 
+#define F_CPU 20000000
+
 #include <avr/io.h>
 #include <avr/signal.h>
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #include <avr/boot.h>
+#include <util/delay.h>
 
 #include "usbdrv.h"
 #include "bootloaderconfig.h"
@@ -38,7 +41,9 @@
 #define STATE_IDLE 0
 #define STATE_WRITE_PAGE 1
 
-#define F_CPU 20000000
+
+#define DLED_ON {  PORTB &= ~(1<<PB0); DDRB &= ~(1<<PB0); }
+#define DLED_OFF { PORTB &= ~(1<<PB0); DDRB |=  (1<<PB0); }
 
 static uchar replyBuffer[8];
 static uchar state = STATE_IDLE;
@@ -60,9 +65,9 @@ uchar   usbFunctionSetup(uchar data[8])
     uchar len = 0;
     
     if (data[1] == USBBOOT_FUNC_LEAVE_BOOT) {
-      leaveBootloader();
+		usbDeviceDisconnect();
+      	leaveBootloader();
     } 
-    
     else if (data[1] == USBBOOT_FUNC_WRITE_PAGE) {
 
       state = STATE_WRITE_PAGE;
@@ -130,7 +135,17 @@ uchar usbFunctionWrite(uchar *data, uchar len)
 
 int main(void)
 {
-    /* initialize hardware */
+    
+  	usbDeviceDisconnect();
+    DLED_OFF;
+    _delay_ms(100);
+    DLED_ON;
+    _delay_ms(100);
+    DLED_OFF;
+    _delay_ms(100);
+    DLED_ON;
+
+	/* initialize hardware */
     BOOTLOADER_INIT;
 
     /* jump to application if jumper is set */
